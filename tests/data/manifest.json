@@ -1,0 +1,35 @@
+{
+   "version": "1.1.0",
+   "repos": {
+      "orquestra-auth": {
+         "url": "git@github.com:zapatacomputing/orquestra-auth.git",
+         "ref": "main",
+         "type": "python",
+         "autodoc": ["orquestra"]
+      },
+      "call-simulator": {
+         "url": "git@github.com:zapatacomputing/call-simulator.git",
+         "ref": "1.0.0",
+         "type": "python",
+         "autodoc": ["src/callsimulator", "automation"]
+      },
+      "orquestra-sdk":{
+         "url": "git@github.com:zapatacomputing/orquestra-sdk.git",
+         "ref": "dev",
+         "type": "python",
+         "autodoc": ["src/python/orquestra"]
+      },
+      "orquestra-runtime":{
+         "url": "git@github.com:zapatacomputing/orquestra-runtime.git",
+         "ref": "feature/vsergeyev/sdk2docs",
+         "type": "python",
+         "autodoc": ["src/python/orquestra"]
+      },
+      "orquestra-foo":{
+         "url": "git@github.com:zapatacomputing/orquestra-foo.git",
+         "ref": "dev",
+         "type": "python",
+         "autodoc": ["src/foo", "bar"]
+      }
+   }
+}

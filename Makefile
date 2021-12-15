@@ -1,4 +1,4 @@
-default: target
+default: list
 
 # define install_repo
 #     @echo Checking out $(1)
@@ -17,29 +17,48 @@ default: target
 # endef
 
 
-.PHONY: target
+# Clean out all Pythonic cruft
+clean:
+	@find . -regex '^.*\(__pycache__\|\.py[co]\)$$' -delete;
+	@find . -type d -name __pycache__ -exec rm -r {} \+
+	@find . -type d -name '*.egg-info' -exec rm -rf {} +
+	@find . -type d -name .mypy_cache -exec rm -r {} \+
+	@rm -rf .pytest_cache;
+	@rm -rf tests/.pytest_cache;
+	@rm -rf dist build
+	@rm -f .coverage*
+	@echo Finished cleaning out pythonic cruft...
+
+install:
+	@echo Installing package
+	pip install .
+
 init:
 	@echo Initializing repos
-	orqm init
+	morq init
 
 update:
 	@echo Update all repos
-	orqm update
+	morq update
 
 list:
 	@echo Listing all repos
-	orqm list
+	@morq list
+
+list_installed:
+	@echo Listing all repos
+	@morq list -i
 
 check:
 	@echo Check all repos for valid versions
-	orqm check
+	morq check
 
 # SubRepos should all have a docs/ folder which we use implicitly
 # For project that support auto-doc (like Python), Sphinx should run autodocs on it
 docs:
 	# Spawn master build on docs
 	@echo building docs
-	orqm docs
+	morq docs
 
 build:
 	@echo Build the entire project
@@ -48,3 +67,5 @@ build:
 	@echo * Try not to build the same project twice: IE: do we build a dependency tree?
 
 
+test:
+	pytest tests
