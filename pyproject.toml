@@ -6,6 +6,9 @@ authors = ["Zapata Computing <zapata@zapatacomputing.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+Sphinx = "^4.3.2"
+sphinx-autoapi = "^1.8.4" 
+clint = "^0.5.1"
 
 [tool.poetry.dev-dependencies]
 
@@ -14,4 +17,10 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-orqm = "orquestra_manifest.common:orqm"
+morq = "orquestra_manifest.common:morq_cli"
+
+# [tool.pytest]
+[tool.pytest.ini_options]
+norecursedirs = ["tests/data/*"]
+log_cli = true
+log_cli_level = "DEBUG"
