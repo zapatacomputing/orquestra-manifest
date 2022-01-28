@@ -8,37 +8,20 @@ repos in the "main" or "master" state does not guarantee a viable state for a pr
 We are then left with dealing with either 1) tagged versions of a branch or worse, 2)
 commits of a branch. We prefer the former, as tags are much easier to understand and manage.
 
-Lets proceed:
+Lets proceed: We start by introducing a tool called *Morq*.
+It requires a manifest file in JSON format which we describe below.
+Morq must have the following base abilities:
 
-We start from a manifest file in JSON format::
+#. List the manifest: *list*
+#. Download arbitrary git repos: *init*
+#. Verify that the repos are in their proper state: *check*
+#. Update those repos to a proper git state: *update*
+#. Remove all the target repos: *purge*
 
+In addtion to the above Morq must be able to do limited installation and testing:
 
-   {
-      "version": "1.1.0",
-      "repos": {
-         "orquestra-auth": {
-            "url": "git@github.com:zapatacomputing/orquestra-auth.git",
-            "ref": "main",
-            "type": "python",
-            "autodoc": ["orquestra"]
-         },
-         "call-simulator": {
-            "url": "git@github.com:zapatacomputing/call-simulator.git",
-            "ref": "1.0.0",
-            "type": "python",
-            "autodoc": ["src/callsimulator", "automation"]
-         },
-         ...
-      }
-   }
-
-We wish for the following conditions with respect to that manifest:
-
-#. Ability to list the manifest: *list*
-#. Ability to download arbitrary git repos: *init*
-#. Ability to verify that the repos are in their proper state: *check*
-#. Maintain those repos in a proper git state: *update*
-#. Ability to remove all the target repos: *purge*
+#. Build all the target repos: *build*
+#. Test all the target repos: *test*
 
 
 We list the basic commands that we associate to those tasks.
@@ -50,8 +33,7 @@ Why not just use some other tool?
 * We want to use a JSON format for manifest.json (No XML please ;)
 * We want simple tests
 
-
-Repo Mechanics
+Morq Commands
 ==============
 In order to achieve these 5 conditions, we implement these in a simple Command Line
 Interface (CLI), which we will outline below. The command we use to invoke these options
@@ -139,6 +121,79 @@ How to Get to a Valid Version
 3. Checkout that tag here.
 4. The master manifest.json would now reflect your correct tagged release.
 
+SuperRepo Setup
+====================
+
+The ideal for your project should be a Git repo that contains metadata for all the
+sub-repos defined in manifest.json .
+
+The project should have a structure as follows:
+
+::
+      # orquestra-release
+      .
+      ├── Makefile
+      ├── README.rst
+      ├── docs
+      │   └── index.rst (optional)
+      └── repos
+          └── manifest.json
+
+The Makefile should have at minimum 2 targets:
+
+#. build (to build all the sub-repos)
+#. test  (to test all the sub-repos)
+
+The manifest.json file should be of the format::
+
+   {
+      "version": "1.1.0",
+      "repos": {
+         "orquestra-auth": {
+            "url": "git@github.com:zapatacomputing/orquestra-auth.git",
+            "ref": "2.3.0",
+            "type": "python",
+            "autodoc": ["orquestra"]
+         },
+         "orquestra-sdk": {
+            "url": "git@github.com:zapatacomputing/orquestra-sdk.git",
+            "ref": "1.2.0",
+            "type": "python",
+            "autodoc": ["src/callsimulator", "automation"]
+         },
+         ...
+      }
+   }
+
+The format must include:
+
+* A 'repos' section that contains  the individual project data.
+* A repo mapping labeled by the repo folder name
+* Dependencies: Repos should be listed in dependency order, least to most dependent.
+  Morq will build them in the order it sees in the manifest, and will fail if a
+  manifest dependency is missing.
+* The 'ref' can be a (tag, branch, commit), but would normally be a tag for a release.
+* Every time a sub-repo is updated and tagged, we need to consider updating the project
+  manifest.json file.
+* The SuperRepo can have multiple branch corresponding to new features. Promoting those
+  features to main is a simple way to manage releases.
+
+
+You must create a Git tag that reflect the correct state of your project as 
+defined by this manifest.
+
+SubRepo Setup
+====================
+
+Each sub-repo can be *any* Git repo with the following characteristics:
+
+* A Makefile with two methods:
+
+  #. build
+  #. test
+
+* The *make build* target should completely build the package for normal use.
+* The repo should contain the reference (tag, branch, commit) stated in the manifest.
 
 Global Documentation
 =====================
