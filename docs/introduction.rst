@@ -127,17 +127,17 @@ SuperRepo Setup
 The ideal for your project should be a Git repo that contains metadata for all the
 sub-repos defined in manifest.json .
 
-The project should have a structure as follows:
+The project (orquestra-release for example) should have a structure as follows:
 
 ::
-      # orquestra-release
+
       .
-      ├── Makefile
-      ├── README.rst
-      ├── docs
-      │   └── index.rst (optional)
-      └── repos
-          └── manifest.json
+      +-- Makefile
+      +-- README.rst
+      +-- docs
+      |   `-- index.rst (optional)
+       `-- repos
+           `-- manifest.json
 
 The Makefile should have at minimum 2 targets:
 

@@ -4,21 +4,22 @@
    "repos": {
       "orquestra-workflow": {
          "url": "git+ssh://git@github.com/zapatacomputing/orquestra-workflow.git",
-         "ref": "v0.4.0",
+         "ref": "v0.6.0",
          "type": "python",
          "autodoc": ["orquestra"]
       },
       "orquestra-sdk":{
          "url": "git@github.com:zapatacomputing/orquestra-sdk.git",
-         "ref": "v0.11.0",
+         "ref": "v0.14.0",
          "type": "python",
          "autodoc": ["src/python/orquestra"]
       },
       "orquestra-runtime":{
          "url": "git@github.com:zapatacomputing/orquestra-runtime.git",
-         "ref": "dev",
+         "ref": "v0.10.0",
          "type": "python",
          "autodoc": ["src/python/orquestra"]
       }
    }
 }
+

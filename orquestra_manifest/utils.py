@@ -1,6 +1,8 @@
 """Utils for this package"""
 import logging
 import pathlib
+import subprocess
+import os
 from enum import Enum, unique
 import git
 from git.exc import BadName, InvalidGitRepositoryError
@@ -17,6 +19,69 @@ class RefType(Enum):
     TAG = 2
     COMMIT = 3
     UNKNOWN = 4
+
+
+class _HashCache:
+    """Keep track of what was hashed"""
+
+    cache: set[int] = set()
+
+    def has_element(self, hashed):
+        """Test if element is present, add it if not"""
+        if hashed in self.cache:
+            return True
+        self.cache.add(hashed)
+        return False
+
+    def clear(self):
+        """Clear the cache"""
+        self.cache = set()
+
+
+def _print_unique(message):
+    """Print all unique messages not in _HashCache"""
+    hashcache = _HashCache()
+    hashed = hash(message)
+    if not hashcache.has_element(hashed):
+        print(message)
+
+
+def run_command(command, stdout=False, verbose=False):
+    """Run a command, handle output.
+
+    * Command : list of system strings.
+    * Return : (int) the return code of the process, per Posix conventions.
+    """
+
+    if verbose:
+        print(f"Running: {command}")
+
+    proc = subprocess.run(command, capture_output=True)
+    if stdout:
+        print(proc.stdout.decode())
+
+    if verbose:
+        print(proc.stderr.decode())
+    else:
+        _print_unique(proc.stderr.decode())
+
+    return proc.returncode
+
+
+def folder_cmd(folder, cmd, verbose=False, stdout=False):
+    """Execute cmd on pathlib.Path folder"""
+    error = 0
+    folder_name = folder.resolve().name
+    cmd_string = " ".join(cmd)
+    LOG.info("Executing '%s' on %s", cmd_string, folder_name)
+    LOG.info("-" * 60)
+    try:
+        os.chdir(folder)
+        error = run_command(cmd, verbose=verbose, stdout=stdout)
+    except Exception as ex:
+        LOG.warning("Failed to '%s' on %s: %s", cmd_string, folder_name, ex)
+        error = 100
+    return error
 
 
 def get_package_root():
@@ -86,7 +151,7 @@ def copy_package_file(from_file, to_file):
 
 def index_of_line_in_file(file, match_line):
     """Get index of line match_line"""
-    with open(file, 'r', encoding='utf-8') as _fd:
+    with open(file, "r", encoding="utf-8") as _fd:
         for (i, line) in enumerate(_fd):
             if match_line in line:
                 return i
@@ -100,7 +165,7 @@ def add_line_to_file(add_line, match_line, file):
     """
     index = index_of_line_in_file(file, match_line)
 
-    with open(file, 'r+', encoding='utf-8') as _fd:
+    with open(file, "r+", encoding="utf-8") as _fd:
         contents = _fd.readlines()
 
         if index == len(contents) - 1:
@@ -151,15 +216,15 @@ def git_pull_change(repo, ref):
 
     # You can't update a tag, try main.
     if ref_is_tag(repo, ref):
-        if 'main' in repo.remotes.origin.refs:
-            repo.git.checkout('main')
-        elif 'master' in repo.remotes.origin.refs:
-            repo.git.checkout('master')
+        if "main" in repo.remotes.origin.refs:
+            repo.git.checkout("main")
+        elif "master" in repo.remotes.origin.refs:
+            repo.git.checkout("master")
         else:
             LOG.warning("Unable to find main or master in : %s", repo)
 
     repo.remotes.origin.pull()
-    repo_name = repo.working_dir.split('/')[-1]
+    repo_name = repo.working_dir.split("/")[-1]
 
     repo.git.checkout(ref)
     if current == repo.head.commit:
@@ -247,4 +312,3 @@ def rm_tree(path):
             rm_tree(child)
         path.rmdir()
     return True
-

@@ -5,16 +5,19 @@ import argparse
 import json
 import logging
 import pathlib
+import textwrap
 import git
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 import argcomplete
 from orquestra_manifest.sphinx_tools import install_sphinx, update_sphinx_conf
 from orquestra_manifest.tabler import Tabler
-from orquestra_manifest.utils import (get_repo_ref_type,
-                                      get_repo_ref_state_ok,
-                                      git_pull_change,
-                                      rm_tree
-                                      )
+from orquestra_manifest.utils import (
+    get_repo_ref_type,
+    get_repo_ref_state_ok,
+    git_pull_change,
+    rm_tree,
+    folder_cmd,
+)
 
 logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger("orquestra_manifest.common")
@@ -30,7 +33,17 @@ class Manifest:
         """Create the parser for the class"""
 
         default_manifest_file = "manifest.json"
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            description=textwrap.dedent(r'''
+                 __  __                 _
+                |  \/  | ___  _ __ __ _| |
+                | |\/| |/ _ \| '__/ _` | |
+                | |  | | (_) | | | (_| |_|
+                |_|  |_|\___/|_|  \__, (_)
+                                     |_|
+        A Tool to manage SuperRepos defined by manifest.json'''),
+        )
         parser.add_argument(
             "-m",
             "--manifest_file",
@@ -42,6 +55,12 @@ class Manifest:
 
         parser_init = subparsers.add_parser("init")
         parser_init.set_defaults(func=self.update_repos)
+
+        parser_build = subparsers.add_parser("build")
+        parser_build.set_defaults(func=self.build_repos)
+
+        parser_build = subparsers.add_parser("test")
+        parser_build.set_defaults(func=self.test_repos)
 
         parser_check = subparsers.add_parser("check")
         parser_check.set_defaults(func=self.check_repos)
@@ -63,18 +82,19 @@ class Manifest:
 
         # Set/Locate the manifest file.
         if pathlib.Path(args.manifest_file).exists():
-            self.manifest_file = pathlib.Path(args.manifest_file)
+            self.manifest_file = pathlib.Path(args.manifest_file).resolve()
         else:
-            LOG.critical("No such manifest: %s"
-                         "\n"
-                         "\nNote:: "
-                         "\n\t+-------------------------------------------------------------+"
-                         "\n\t| You must either be in a folder that contains manifest.json, |"
-                         "\n\t|  -or- point to the manifest with '-m path/to/manifest.json' |"
-                         "\n\t+-------------------------------------------------------------+"
-                         "\n"
-                         , args.manifest_file)
-            # raise FileNotFoundError(args.manifest_file)
+            LOG.critical(
+                "No such manifest: %s"
+                "\n"
+                "\nNote:: "
+                "\n\t+-------------------------------------------------------------+"
+                "\n\t| You must either be in a folder that contains manifest.json, |"
+                "\n\t|  -or- point to the manifest with '-m path/to/manifest.json' |"
+                "\n\t+-------------------------------------------------------------+"
+                "\n",
+                args.manifest_file,
+            )
             sys.exit(1)
 
         try:
@@ -90,7 +110,7 @@ class Manifest:
     def get_manifest(self):
         """Get Manifest dictionary from manifest.json"""
 
-        manifest_fd = self.manifest_file.open(mode="r", encoding='utf-8')
+        manifest_fd = self.manifest_file.open(mode="r", encoding="utf-8")
         return json.load(manifest_fd)
 
     def get_folder_path(self, repo_name):
@@ -135,20 +155,20 @@ class Manifest:
                 # Log missing repo.
                 LOG.debug("Missing repo %s", folder_path)
                 tabler.push_datum(
-                    folder=folder_path.name,
-                    ref=ref,
-                    position="None",
-                    status="Missing",)
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        position="None",
+                        status="Missing",
+                    )
+                )
                 continue
 
             # If a Git repo is in good status, don't do anything...
             state_ok = get_repo_ref_state_ok(repo, ref)
             if state_ok:
                 tabler.push_datum(
-                    folder=folder_path.name,
-                    ref=ref,
-                    position=ref,
-                    status="OK"
+                    dict(folder=folder_path.name, ref=ref, position=ref, status="OK")
                 )
                 continue
 
@@ -161,10 +181,12 @@ class Manifest:
                     status = f"{commit_delta} ahead"
 
                 tabler.push_datum(
-                    folder=folder_path.name,
-                    ref=ref,
-                    position=repo.commit().hexsha[:8],
-                    status=status,
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        position=repo.commit().hexsha[:8],
+                        status=status,
+                    )
                 )
                 continue
 
@@ -172,10 +194,12 @@ class Manifest:
                 ref_type = get_repo_ref_type(repo, ref)
 
                 tabler.push_datum(
-                    folder=folder_path.name,
-                    ref=ref,
-                    ref_type=ref_type.name,
-                    status="Dirty",
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        ref_type=ref_type.name,
+                        status="Dirty",
+                    )
                 )
         print(tabler.get_table())
 
@@ -209,9 +233,7 @@ class Manifest:
             if not repo:
                 # Log missing repo.
                 LOG.warning(
-                    "Missing repo %s"
-                    "\n\t=> Attempting to clone....",
-                    folder_path
+                    "Missing repo %s" "\n\t=> Attempting to clone....", folder_path
                 )
                 # Clone the repo, because its missing
                 LOG.info("Cloning repo %s", folder_path)
@@ -222,11 +244,13 @@ class Manifest:
                     LOG.critical("  => URL %s does not exist!", url)
                     LOG.debug("Full URL error: %s", ex)
                     tabler.push_datum(
-                        folder=folder_path.name,
-                        ref=ref,
-                        position="Invalid",
-                        status="Invalid",
-                        update="N/A",
+                        dict(
+                            folder=folder_path.name,
+                            ref=ref,
+                            position="Invalid",
+                            status="Invalid",
+                            update="N/A",
+                        )
                     )
                     continue
 
@@ -237,20 +261,24 @@ class Manifest:
                     LOG.critical("  => Git Ref %s does not exist!: %s", ref, ex)
                     LOG.debug("Full Ref error: %s", ex)
                     tabler.push_datum(
-                        folder=folder_path.name,
-                        ref=ref,
-                        position="Invalid",
-                        status="Invalid",
-                        update="New",
+                        dict(
+                            folder=folder_path.name,
+                            ref=ref,
+                            position="Invalid",
+                            status="Invalid",
+                            update="New",
+                        )
                     )
                     continue
                 else:
                     tabler.push_datum(
-                        folder=folder_path.name,
-                        ref=ref,
-                        position=ref,
-                        status="OK",
-                        update="New",
+                        dict(
+                            folder=folder_path.name,
+                            ref=ref,
+                            position=ref,
+                            status="OK",
+                            update="New",
+                        )
                     )
                     continue
 
@@ -262,12 +290,15 @@ class Manifest:
             # If a Git repo is in good status, check for changes
             state_ok = get_repo_ref_state_ok(repo, ref)
             if state_ok:
-                tabler.push_datum(folder=folder_path.name,
-                                  ref=ref,
-                                  position=ref,
-                                  status="OK",
-                                  update=update,
-                                  )
+                tabler.push_datum(
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        position=ref,
+                        status="OK",
+                        update=update,
+                    )
+                )
                 continue
 
             # All else is either behind or ahead. Find out.
@@ -279,22 +310,26 @@ class Manifest:
                     status = f"{commit_delta} ahead"
 
                 tabler.push_datum(
-                    folder=folder_path.name,
-                    ref=ref,
-                    position=repo.commit().hexsha[:8],
-                    status=status,
-                    update=update,
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        position=repo.commit().hexsha[:8],
+                        status=status,
+                        update=update,
+                    )
                 )
                 continue
 
             if repo.is_dirty():
                 ref_type = get_repo_ref_type(repo, ref)
                 tabler.push_datum(
-                    folder=folder_path.name,
-                    ref=ref,
-                    ref_type=ref_type.name,
-                    status="Dirty",
-                    update=update,
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        ref_type=ref_type.name,
+                        status="Dirty",
+                        update=update,
+                    )
                 )
 
         print(tabler.get_table())
@@ -337,15 +372,57 @@ class Manifest:
 
         return repo
 
-    def list_repos(self) -> bool:
+    def build_repos(self):
+        """Build all repos
+
+        Return: (int) Total error
+        """
+        total_error = 0
+        error = 0
+        tabler = Tabler()
+        repos = self.get_repos_from_manifest()
+        cmd = ["make", "install"]
+
+        for _folder, _ in repos.items():
+            folder_path = self.get_folder_path(_folder)
+            error = folder_cmd(folder_path, cmd)
+            total_error += error
+            tabler.push_datum(
+                dict(folder=_folder, build=("Failed" if error else "OK"))
+            )
+
+        print(tabler.get_table())
+        return total_error
+
+    def test_repos(self):
+        """Test all repos
+
+        Return: Total error
+        """
+        total_error = 0
+        error = 0
+        tabler = Tabler()
+        repos = self.get_repos_from_manifest()
+        cmd = ["make", "test"]
+
+        for _folder, _ in repos.items():
+            folder_path = self.get_folder_path(_folder)
+            error = folder_cmd(folder_path, cmd, stdout=True)
+            total_error += error
+            tabler.push_datum(
+                dict(folder=_folder, test=("Failed" if error else "OK"))
+            )
+
+        print(tabler.get_table())
+        return total_error
+
+    def list_repos(self):
         """List repos and refs for each manifest repo"""
         repos = self.get_repos_from_manifest()
         tabler = Tabler()
 
         for _folder, record in repos.items():
-            tabler.push_datum(record=record.get('url'),
-                              ref=record.get('ref')
-                              )
+            tabler.push_datum(dict(url=record.get("url"), ref=record.get("ref")))
         print(tabler.get_table())
 
     def init_sphinx(self):

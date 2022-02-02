@@ -1,5 +1,9 @@
 """Module to assist with text tables"""
+import logging
 from clint.textui import colored
+
+logging.basicConfig()
+LOG = logging.getLogger('tabler')
 
 
 class Tabler:
@@ -33,10 +37,17 @@ class Tabler:
         """Get headings of data"""
         return list(self.data[0].keys())
 
-    def push_datum(self, **datum):
-        """Push a datum on self.data"""
-        thing = dict(**datum)
-        self.data.append(thing)
+    def push_datum(self, element):
+        """Push a dict onto on self.data"""
+        if element.__class__ is not dict:
+            raise ValueError("You must push a dict object")
+
+        # If there is already elements in data, they must be similar.
+        if self.data:
+            if not set(self.data[0]).intersection(element):
+                raise ValueError("You can't push dicts with different keys")
+
+        self.data.append(element)
 
     def get_dimensions(self):
         """Get the dimension of data entries, based on first data[0]"""
