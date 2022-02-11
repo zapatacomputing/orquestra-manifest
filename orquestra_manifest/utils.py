@@ -24,7 +24,7 @@ class RefType(Enum):
 class _HashCache:
     """Keep track of what was hashed"""
 
-    cache: set[int] = set()
+    cache: set([int]) = set()
 
     def has_element(self, hashed):
         """Test if element is present, add it if not"""
