@@ -1,9 +1,12 @@
 """Test common module"""
 import logging
+import re
 import sys
+import pathlib
 import pytest
+import tempfile
 from orquestra_manifest.common import Manifest
-from orquestra_manifest.utils import get_package_root
+from orquestra_manifest.utils import copy_package_file, get_package_root
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,9 +21,16 @@ class TestCommon:
         # configure self.attribute
         cls.manifest = Manifest()
         assert cls.manifest is not None
+
         package_root = get_package_root()
 
-        cls.manifest_file = package_root / 'tests/data/manifest.json'
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.manifest_base = pathlib.Path(cls.tmp.name)
+
+        test_manifest_file = package_root / 'tests/data/manifest.json'
+        cls.manifest_file = cls.manifest_base / 'manifest.json'
+        copy_package_file(test_manifest_file, cls.manifest_file)
+
         sys.argv = ['', '-m', cls.manifest_file.as_posix(), 'init']
         output = cls.manifest.parse_args()
         assert output is True
@@ -32,6 +42,7 @@ class TestCommon:
     def teardown_class(cls):
         """Remove all test data."""
         cls.manifest.purge_repos()
+        del cls.tmp
 
     @pytest.fixture(autouse=True)
     def _pass_fixtures(self, capsys):
@@ -86,3 +97,14 @@ class TestCommon:
 
         outerr = self.capsys.readouterr()
         assert any([thing for thing in str.splitlines(outerr.out) if 'Unchanged' in thing])
+
+    def test_build_repos(self):
+        """Test the check method"""
+        sys.argv = ['', '-m', self.manifest_file.as_posix(), 'build']
+
+        output = self.manifest.parse_args()
+        assert output is True
+
+        outerr = self.capsys.readouterr()
+        regex = re.compile('orquestra-foo\s*\|\s*Failed')
+        assert regex.search(outerr.out) is not None
