@@ -35,14 +35,16 @@ class Manifest:
         default_manifest_file = "manifest.json"
         parser = argparse.ArgumentParser(
             formatter_class=argparse.RawDescriptionHelpFormatter,
-            description=textwrap.dedent(r'''
+            description=textwrap.dedent(
+                r"""
                  __  __                 _
                 |  \/  | ___  _ __ __ _| |
                 | |\/| |/ _ \| '__/ _` | |
                 | |  | | (_) | | | (_| |_|
                 |_|  |_|\___/|_|  \__, (_)
                                      |_|
-        A Tool to manage SuperRepos defined by manifest.json'''),
+        A Tool to manage SuperRepos defined by manifest.json"""
+            ),
         )
         parser.add_argument(
             "-m",
@@ -387,9 +389,7 @@ class Manifest:
             folder_path = self.get_folder_path(_folder)
             error = folder_cmd(folder_path, cmd)
             total_error += error
-            tabler.push_datum(
-                dict(folder=_folder, build=("Failed" if error else "OK"))
-            )
+            tabler.push_datum(dict(folder=_folder, build=("Failed" if error else "OK")))
 
         print(tabler.get_table())
         return total_error
@@ -400,18 +400,16 @@ class Manifest:
         Return: Total error
         """
         total_error = 0
-        error = 0
         tabler = Tabler()
         repos = self.get_repos_from_manifest()
-        cmd = ["make", "test"]
 
         for _folder, _ in repos.items():
+            error = 0
             folder_path = self.get_folder_path(_folder)
-            error = folder_cmd(folder_path, cmd, stdout=True)
+            error += folder_cmd(folder_path, ["make", "develop"], stdout=False)
+            error += folder_cmd(folder_path, ["make", "test"], stdout=True)
             total_error += error
-            tabler.push_datum(
-                dict(folder=_folder, test=("Failed" if error else "OK"))
-            )
+            tabler.push_datum(dict(folder=_folder, test=("Failed" if error else "OK")))
 
         print(tabler.get_table())
         return total_error

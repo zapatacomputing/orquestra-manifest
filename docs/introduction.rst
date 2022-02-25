@@ -1,5 +1,5 @@
-Introduction
-==============
+Introduction: Morq from Orq
+==============================
 
 This project attempts to bring order to a large set of Git repositories that together
 form a coherent product. The challenge is that simply stitching everything together with
@@ -28,7 +28,7 @@ We list the basic commands that we associate to those tasks.
 
 Why not just use some other tool?
 ----------------------------------
-* Leverage modern tools like GitPython and Pathlib, instead of older 2.7-ish stuff
+* Leverage the modern GitPython and Pathlib, instead of ancient 2.7-ish code.
 * We want a simple tool that is easy to understand.
 * We want to use a JSON format for manifest.json (No XML please ;)
 * We want simple tests
@@ -114,37 +114,26 @@ Remaining Work
 * Improved textual output: coloration etc...
 * Output information in JSON for devops and automation?
 
-How to Get to a Valid Version
-===============================
-1. Checkout this repo
-2. Find the tag for the release you are interested in
-3. Checkout that tag here.
-4. The master manifest.json would now reflect your correct tagged release.
+SuperRepo Setup: A Valid Version of the software.
+==================================================
 
-SuperRepo Setup
-====================
+A valid version of the software, according to *Morq*, is a manifest.json file
+that reflects a collection of repositories that are compatible.
+This could be the entire orquestra suite or just a few repos you want to work with.
 
-The ideal for your project should be a Git repo that contains metadata for all the
-sub-repos defined in manifest.json .
-
-The project (orquestra-release for example) should have a structure as follows:
+The ideal for your project should be a tiny Git repo that contains a valid manifest.json.
+The project (orquestra-release for example) could have a structure as follows:
 
 ::
 
       .
-      +-- Makefile
       +-- README.rst
       +-- docs
       |   `-- index.rst (optional)
        `-- repos
            `-- manifest.json
 
-The Makefile should have at minimum 2 targets:
-
-#. build (to build all the sub-repos)
-#. test  (to test all the sub-repos)
-
-The manifest.json file should be of the format::
+The manifest.json file is a JSON file of the format::
 
    {
       "version": "1.1.0",
@@ -161,39 +150,49 @@ The manifest.json file should be of the format::
             "type": "python",
             "autodoc": ["src/callsimulator", "automation"]
          },
-         ...
+         ... etc ...
       }
    }
 
-The format must include:
+The JSON format must include:
 
-* A 'repos' section that contains  the individual project data.
-* A repo mapping labeled by the repo folder name
-* Dependencies: Repos should be listed in dependency order, least to most dependent.
-  Morq will build them in the order it sees in the manifest, and will fail if a
-  manifest dependency is missing.
-* The 'ref' can be a (tag, branch, commit), but would normally be a tag for a release.
-* Every time a sub-repo is updated and tagged, we need to consider updating the project
-  manifest.json file.
-* The SuperRepo can have multiple branch corresponding to new features. Promoting those
-  features to main is a simple way to manage releases.
+* The 'repos' section that contains  the individual project data.
+* The repo mapping is labeled by the repo folder name.
+* The 'ref' can be a (tag, branch, commit), but would normally be a *tag* for a release.
+* The 'autodoc' line is a list of source modules that are to be indexed by Sphinx.
 
+.. Note::
 
-You must create a Git tag that reflect the correct state of your project as 
-defined by this manifest.
+   * Dependencies: Repos must be listed in dependency order, least to most dependent.
+     Morq will build them in the order it sees in the manifest, and will fail if a
+     manifest dependency is missing.
+
+   * Every time a sub-repo is updated and tagged, we must update the project manifest.json file.
+
+   * The SuperRepo can have multiple branches corresponding to various features. Promoting those
+     features to main is equivalent to a *release*.
+
+   * You must create a Git tag that reflect the correct state of your project as 
+     defined by this manifest.
+
 
 SubRepo Setup
 ====================
 
 Each sub-repo can be *any* Git repo with the following characteristics:
 
-* A Makefile with two methods:
+* A Makefile with the following targets:
 
-  #. build
-  #. test
+   #. build   (to build the package)
+   #. develop (to build the package for testing)
+   #. test    (to test the package)
 
-* The *make build* target should completely build the package for normal use.
-* The repo should contain the reference (tag, branch, commit) stated in the manifest.
+
+.. Note:: Requirements:
+
+   * The repo must contain the reference (tag, branch, commit) stated in the manifest.
+   * The *make build* target must completely build the package for production use.
+   * The *make develop* target must build the package for development and to pass unit tests.
 
 Global Documentation
 =====================
@@ -202,7 +201,7 @@ conjunction with the morq tools above.
 
 Assumptions:
 
-* Each repo has a `~/docs` folder with an `index.rst` with possibly more rst files.
+* Each repo has a `~/docs` folder with an `index.rst` per normal Sphinx-doc setup.
 * The manifest has a document *autodoc* folder that the *autoapi* tool uses
 * Nearly all configuration can be done automatically with enough reasonable effort.
 
