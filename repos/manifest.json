@@ -6,7 +6,7 @@
          "url": "git+ssh://git@github.com/zapatacomputing/orquestra-workflow.git",
          "ref": "v0.6.0",
          "type": "python",
-         "autodoc": ["orquestra"]
+         "autodoc": ["src/orquestra"]
       },
       "orquestra-sdk":{
          "url": "git@github.com:zapatacomputing/orquestra-sdk.git",

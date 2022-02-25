@@ -3,7 +3,7 @@ import logging
 from clint.textui import colored
 
 logging.basicConfig()
-LOG = logging.getLogger('tabler')
+LOG = logging.getLogger("tabler")
 
 
 class Tabler:
@@ -63,31 +63,31 @@ class Tabler:
     def liner(self):
         """Make a seperator line"""
         dims = self.get_dimensions()
-        liner = '+'
+        liner = "+"
         for dim in dims:
             liner += f'-{"-" *  dim }-+'
-        liner += '\n'
+        liner += "\n"
         return liner
 
     def header(self):
         """Make a header line"""
         dims = self.get_dimensions()
         headings = self.get_headings()
-        header = '|'
+        header = "|"
         for idx, head in enumerate(headings):
-            header += f' {head:{dims[idx]}s} |'
-        header += '\n'
+            header += f" {head:{dims[idx]}s} |"
+        header += "\n"
         return header
 
     def color_word(self, color, word, output):
         """Make a word red in output"""
-        if color == 'red':
+        if color == "red":
             return output.replace(word, str(colored.red(word)))
-        elif color == 'green':
+        elif color == "green":
             return output.replace(word, str(colored.green(word)))
-        elif color == 'blue':
+        elif color == "blue":
             return output.replace(word, str(colored.blue(word)))
-        elif color == 'yellow':
+        elif color == "yellow":
             return output.replace(word, str(colored.yellow(word)))
 
     def data_lines(self):
@@ -97,19 +97,19 @@ class Tabler:
         output = str()
 
         for _datum in self.data:
-            data_line = '|'
+            data_line = "|"
             for idx, _ in enumerate(headings):
-                data_line += f' {_datum.get(headings[idx]):{dims[idx]}s} |'
-            data_line += '\n'
+                data_line += f" {_datum.get(headings[idx]):{dims[idx]}s} |"
+            data_line += "\n"
             output += data_line
 
-        output = self.color_word('red', 'Missing', output)
-        output = self.color_word('red', 'None', output)
-        output = self.color_word('red', 'Invalid', output)
-        output = self.color_word('red', 'N/A', output)
-        output = self.color_word('blue', 'Updated', output)
-        output = self.color_word('green', 'OK', output)
-        output = self.color_word('blue', 'New', output)
+        output = self.color_word("red", "Missing", output)
+        output = self.color_word("red", "None", output)
+        output = self.color_word("red", "Invalid", output)
+        output = self.color_word("red", "N/A", output)
+        output = self.color_word("blue", "Updated", output)
+        output = self.color_word("green", "OK", output)
+        output = self.color_word("blue", "New", output)
 
         return output
 
@@ -121,6 +121,3 @@ class Tabler:
         output += self.data_lines()
         output += self.liner()
         return output
-
-
-

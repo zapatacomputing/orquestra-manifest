@@ -7,7 +7,7 @@ from sphinx.cmd import quickstart
 from orquestra_manifest.utils import (
     add_line_to_file,
     append_string_to_file,
-    replace_text_in_file
+    replace_text_in_file,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +25,7 @@ def install_sphinx(folder, project_name="GenericProject", author="Zapata Computi
         return False
 
     os.chdir(folder)
-    args = ['-q', '--project', project_name, '--author', author]
+    args = ["-q", "--project", project_name, "--author", author]
     LOG.info("Installing a Sphinx configuration to %s", folder)
     quickstart.main(args)
 
@@ -51,39 +51,40 @@ def update_sphinx_conf(manifest):
 
     # -------------------------------------------------------------------------
     # Add the */docs/index to index.rst
-    index_path = pathlib.Path('index.rst')
+    index_path = pathlib.Path("index.rst")
 
-    add_string = '   :glob:'
+    add_string = "   :glob:"
     if add_string not in sphinx_conf.extensions:
-        match_line = '   :caption: Contents:\n'
+        match_line = "   :caption: Contents:\n"
         add_line_to_file(f"{add_string}\n", match_line, index_path)
-    add_string = '\n   */docs/index'
+    add_string = "\n   */docs/index"
     if add_string not in sphinx_conf.extensions:
-        match_line = '   :glob:\n'
+        match_line = "   :glob:\n"
         add_line_to_file(f"{add_string}\n", match_line, index_path)
     # -------------------------------------------------------------------------
     # Add copy -a line to Makefile
-    makefile_path = pathlib.Path('Makefile')
-    add_string = ('\nhtml: Makefile'
-                  '\n\t@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)'
-                  '\n\tcp -a _build/html /tmp/'
-                  '\n'
-                  )
+    makefile_path = pathlib.Path("Makefile")
+    add_string = (
+        "\nhtml: Makefile"
+        '\n\t@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)'
+        "\n\tcp -a _build/html /tmp/"
+        "\n"
+    )
     append_string_to_file(add_string, makefile_path)
 
     # -------------------------------------------------------------------------
-    conf_path = pathlib.Path('conf.py')
+    conf_path = pathlib.Path("conf.py")
     # Replace the theme of alabaster with sphinx_rtd_theme
-    replace_text_in_file('alabaster', 'sphinx_rtd_theme', conf_path)
+    replace_text_in_file("alabaster", "sphinx_rtd_theme", conf_path)
 
     # Add the autoapi extension to conf.py
-    add_string = 'autoapi.extension'
+    add_string = "autoapi.extension"
     if add_string not in sphinx_conf.extensions:
-        match_line = 'extensions = ['
+        match_line = "extensions = ["
         add_line_to_file(f"    '{add_string}',\n", match_line, conf_path)
 
     # Add the python doc folders into autoapi_dirs
-    if not hasattr(sphinx_conf, 'autoapi_dirs'):
+    if not hasattr(sphinx_conf, "autoapi_dirs"):
         match_line = "html_static_path = ['_static']"
         add_line_to_file("\nautoapi_dirs = [\n]\n", match_line, conf_path)
 
@@ -93,8 +94,17 @@ def update_sphinx_conf(manifest):
             # Skip the bogus folders
             if not pathlib.Path(folder).exists():
                 continue
-            autodoc = record.get('autodoc')
+            autodoc = record.get("autodoc")
             for path in autodoc:
-                path = folder + '/' + path
+                path = folder + "/" + path
                 add_line_to_file(f"    '{path}',\n", api_match_line, conf_path)
+
+    # add autoapi adjustments to bottom of conf.py
+    strings_to_append_conf = [
+        'autoapi_ignore = ["*/tests*", "*/project*", "*/docs/*"]\n',
+        'autoapi_root = "api"\n',
+    ]
+    for line in strings_to_append_conf:
+        append_string_to_file(line, conf_path)
+
     return True
