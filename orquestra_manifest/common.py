@@ -166,6 +166,18 @@ class Manifest:
                 )
                 continue
 
+            # Repo ref is invalid, skip:
+            if ref not in repo.refs:
+                tabler.push_datum(
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        position="invalid",
+                        status="invalid",
+                    )
+                )
+                continue
+
             # If a Git repo is in good status, don't do anything...
             state_ok = get_repo_ref_state_ok(repo, ref)
             if state_ok:
@@ -284,10 +296,31 @@ class Manifest:
                     )
                     continue
 
-            if git_pull_change(repo, ref):
-                update = "Updated"
-            else:
-                update = "Unchanged"
+            # Check that the ref exists here first
+            if ref not in repo.refs:
+                tabler.push_datum(
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        position="invalid",
+                        status="invalid",
+                        update="N/A",
+                    )
+                )
+                continue
+
+            update_status = git_pull_change(repo, ref)
+            if update_status == "invalid":
+                tabler.push_datum(
+                    dict(
+                        folder=folder_path.name,
+                        ref=ref,
+                        position=ref,
+                        status="invalid",
+                        update=update_status,
+                    )
+                )
+                continue
 
             # If a Git repo is in good status, check for changes
             state_ok = get_repo_ref_state_ok(repo, ref)
@@ -298,7 +331,7 @@ class Manifest:
                         ref=ref,
                         position=ref,
                         status="OK",
-                        update=update,
+                        update=update_status,
                     )
                 )
                 continue
@@ -317,7 +350,7 @@ class Manifest:
                         ref=ref,
                         position=repo.commit().hexsha[:8],
                         status=status,
-                        update=update,
+                        update=update_status,
                     )
                 )
                 continue
@@ -330,7 +363,7 @@ class Manifest:
                         ref=ref,
                         ref_type=ref_type.name,
                         status="Dirty",
-                        update=update,
+                        update=update_status,
                     )
                 )
 
@@ -383,13 +416,27 @@ class Manifest:
         error = 0
         tabler = Tabler()
         repos = self.get_repos_from_manifest()
-        cmd = ["make", "install"]
+        make_cmd = ["make", "install"]
+        pip_cmd = ["python3", "-m", "pip", "install", "."]
 
-        for _folder, _ in repos.items():
+        for _folder, record in repos.items():
             folder_path = self.get_folder_path(_folder)
-            error = folder_cmd(folder_path, cmd)
+            make_path = folder_path / "Makefile"
+
+            if make_path.exists():
+                error = folder_cmd(folder_path, make_cmd)
+                state = "Failed" if error else "OK"
+
+            elif record.get("type") == "python":
+                error = folder_cmd(folder_path, pip_cmd)
+                state = "Failed" if error else "OK"
+
+            else:
+                error = 10
+                state = f"Builder {_folder} N/A"
+
             total_error += error
-            tabler.push_datum(dict(folder=_folder, build=("Failed" if error else "OK")))
+            tabler.push_datum(dict(folder=_folder, build=state))
 
         print(tabler.get_table())
         return total_error

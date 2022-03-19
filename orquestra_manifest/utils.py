@@ -5,7 +5,7 @@ import subprocess
 import os
 from enum import Enum, unique
 import git
-from git.exc import BadName, InvalidGitRepositoryError
+from git.exc import BadName, InvalidGitRepositoryError, GitCommandError
 
 logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger("orquestra_manifest.utils")
@@ -56,7 +56,12 @@ def run_command(command, stdout=False, verbose=False):
     if verbose:
         print(f"Running: {command}")
 
-    proc = subprocess.run(command, capture_output=True)
+    try:
+        proc = subprocess.run(command, shell=False, capture_output=True)
+    except Exception as ex:
+        print(f"Exception running command {command}: {ex}")
+        return ex.errno
+
     if stdout:
         print(proc.stdout.decode())
 
@@ -210,11 +215,11 @@ def get_tag_name(repo):
 def git_pull_change(repo, ref):
     """Pull the repo and detect if current position was changed
 
-    return: boolean True if changed, else False
+    return: state string: [changed, unchanged, invalid]
     """
     current = repo.head.commit
 
-    # You can't update a tag, try main.
+    # You can't update a tag, try main or master.
     if ref_is_tag(repo, ref):
         if "main" in repo.remotes.origin.refs:
             repo.git.checkout("main")
@@ -226,13 +231,18 @@ def git_pull_change(repo, ref):
     repo.remotes.origin.pull()
     repo_name = repo.working_dir.split("/")[-1]
 
-    repo.git.checkout(ref)
+    try:
+        repo.git.checkout(ref)
+    except GitCommandError as ex:
+        LOG.warning("Git reference %s invalid for %s: %s", ref, repo_name, ex)
+        return "invalid"
+
     if current == repo.head.commit:
         LOG.debug("Git state unchanged: %s", repo_name)
-        return False
+        return "unchanged"
 
     LOG.debug("Git state changed: %s", repo_name)
-    return True
+    return "changed"
 
 
 def ref_is_tag(repo, ref):

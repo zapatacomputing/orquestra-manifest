@@ -6,17 +6,18 @@ import pytest
 import tempfile
 
 import git
-from orquestra_manifest.utils import (add_line_to_file,
-                                      copy_package_file,
-                                      get_package_file,
-                                      get_package_root,
-                                      git_pull_change,
-                                      index_of_line_in_file,
-                                      rm_tree,
-                                      _HashCache,
-                                      _print_unique,
-                                      run_command
-                                      )
+from orquestra_manifest.utils import (
+    add_line_to_file,
+    copy_package_file,
+    get_package_file,
+    get_package_root,
+    git_pull_change,
+    index_of_line_in_file,
+    rm_tree,
+    _HashCache,
+    _print_unique,
+    run_command,
+)
 
 logging.basicConfig(level=logging.DEBUG)
 LOG = logging.getLogger()
@@ -24,6 +25,7 @@ LOG = logging.getLogger()
 
 class TestUtils:
     """Test the Common module"""
+
     @classmethod
     def setup_class(cls):
         """Setup Class properties"""
@@ -35,6 +37,7 @@ class TestUtils:
     @classmethod
     def teardown_class(cls):
         """Remove all test data."""
+        os.chdir(cls.origin)
         del cls.tmp
 
     @pytest.fixture(autouse=True)
@@ -57,13 +60,13 @@ class TestUtils:
 
     def test_get_package_file(self):
         """Test the get_package_root function"""
-        package_file = get_package_file('tests/data/manifest.json')
+        package_file = get_package_file("tests/data/manifest.json")
         assert package_file.exists()
 
     def test_copy_package_file(self):
         """Copy a file from this package."""
-        source_file = get_package_file('tests/data/manifest.json')
-        target_file = self.tmpfile / 'junk.json'
+        source_file = get_package_file("tests/data/manifest.json")
+        target_file = self.tmpfile / "junk.json"
         count = copy_package_file(source_file, target_file)
         assert count == target_file.stat().st_size == source_file.stat().st_size
 
@@ -75,27 +78,29 @@ class TestUtils:
         assert index_of_line_in_file(path_to_manifest, line) >= 0
 
     def test_add_line_to_file(self):
-        file = self.tmpfile / 'orquestra_manifest_utils.txt'
+        file = self.tmpfile / "orquestra_manifest_utils.txt"
         # Create the file
-        open(file, 'a', encoding='utf-8').close()
+        open(file, "a", encoding="utf-8").close()
 
-        file.write_text('checkpoint\n', encoding='utf-8')
+        file.write_text("checkpoint\n", encoding="utf-8")
 
-        with open(file, encoding='utf-8') as _fd:
+        with open(file, encoding="utf-8") as _fd:
             assert len(list(_fd)) == 1
-        add_line_to_file('added_line\n', 'checkpoint', file)
-        with open(file, encoding='utf-8') as _fd:
+        add_line_to_file("added_line\n", "checkpoint", file)
+        with open(file, encoding="utf-8") as _fd:
             assert len(list(_fd)) == 2
-        add_line_to_file('added_line\n', 'checkpoint', file)
-        with open(file, encoding='utf-8') as _fd:
+        add_line_to_file("added_line\n", "checkpoint", file)
+        with open(file, encoding="utf-8") as _fd:
             assert len(list(_fd)) == 2
 
     def test_git_pull_change(self):
-        path = self.tmpfile / 'junk_repo'
-        repo = git.Repo.clone_from('git@github.com:heroku-python/flask-heroku.git', path)
-        repo.head.reset('HEAD~8', index=True, working_tree=True)
-        changed = git_pull_change(repo, 'master')
-        assert changed is True
+        path = self.tmpfile / "junk_repo"
+        repo = git.Repo.clone_from(
+            "git@github.com:heroku-python/flask-heroku.git", path
+        )
+        repo.head.reset("HEAD~8", index=True, working_tree=True)
+        changed = git_pull_change(repo, "master")
+        assert changed == "changed"
         rm_tree(path)
 
     def test_HashCache(self):
@@ -125,22 +130,23 @@ class TestUtils:
 
     def test_run_command(self):
         os.chdir(self.tmpfile)
-        command = ['ls', '-l']
+        command = ["ls", "-l"]
         run_command(command, verbose=True)
         out, err = self.capsys.readouterr()
         assert "Running:" in out
 
         # bad command
-        command = ['cd', 'xxxyyy']
+        command = ["cdxx"]
         run_command(command, verbose=False)
         out, err = self.capsys.readouterr()
-        assert "No such file" in out
+        assert "Exception running command" in out
 
+        command = ["cat", "asdlfkj"]
         run_command(command, verbose=True)
         out, err = self.capsys.readouterr()
         assert "No such file" in out
 
-        command = ['cd', 'xxxaaa']
+        command = ["cd", "xxxaaa"]
         run_command(command, verbose=False)
         out, err = self.capsys.readouterr()
         assert "No such file" in out
