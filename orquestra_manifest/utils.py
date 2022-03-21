@@ -1,11 +1,12 @@
 """Utils for this package"""
 import logging
+import os
 import pathlib
 import subprocess
-import os
 from enum import Enum, unique
+
 import git
-from git.exc import BadName, InvalidGitRepositoryError, GitCommandError
+from git.exc import BadName, GitCommandError, InvalidGitRepositoryError
 
 logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger("orquestra_manifest.utils")

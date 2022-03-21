@@ -1,13 +1,14 @@
 """Test common module"""
 import logging
 import os
-import sys
 import pathlib
-import pytest
+import sys
 import tempfile
+
+import pytest
+
 from orquestra_manifest.common import Manifest
 from orquestra_manifest.utils import copy_package_file, get_package_root
-
 
 logging.basicConfig(level=logging.DEBUG)
 LOG = logging.getLogger()

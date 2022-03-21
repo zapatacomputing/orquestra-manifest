@@ -2,11 +2,14 @@
 import logging
 import os
 import pathlib
-import pytest
 import tempfile
 
 import git
+import pytest
+
 from orquestra_manifest.utils import (
+    _HashCache,
+    _print_unique,
     add_line_to_file,
     copy_package_file,
     get_package_file,
@@ -14,8 +17,6 @@ from orquestra_manifest.utils import (
     git_pull_change,
     index_of_line_in_file,
     rm_tree,
-    _HashCache,
-    _print_unique,
     run_command,
 )
 

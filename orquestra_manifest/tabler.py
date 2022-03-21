@@ -1,5 +1,6 @@
 """Module to assist with text tables"""
 import logging
+
 from clint.textui import colored
 
 logging.basicConfig()

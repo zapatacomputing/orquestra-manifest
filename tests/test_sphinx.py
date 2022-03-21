@@ -1,12 +1,14 @@
 """Test common module"""
 import logging
 import os
-import sys
 import pathlib
+import sys
+
 import pytest
+
 from orquestra_manifest.common import Manifest
-from orquestra_manifest.utils import get_package_root, copy_package_file, rm_tree
 from orquestra_manifest.sphinx_tools import install_sphinx, update_sphinx_conf
+from orquestra_manifest.utils import copy_package_file, get_package_root, rm_tree
 
 logging.basicConfig(level=logging.DEBUG)
 LOG = logging.getLogger()

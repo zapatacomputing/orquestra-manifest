@@ -1,22 +1,24 @@
 """Common Tools for Orquestra-Manifest"""
 
-import sys
 import argparse
 import json
 import logging
 import pathlib
+import sys
 import textwrap
+
+import argcomplete
 import git
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
-import argcomplete
+
 from orquestra_manifest.sphinx_tools import install_sphinx, update_sphinx_conf
 from orquestra_manifest.tabler import Tabler
 from orquestra_manifest.utils import (
-    get_repo_ref_type,
+    folder_cmd,
     get_repo_ref_state_ok,
+    get_repo_ref_type,
     git_pull_change,
     rm_tree,
-    folder_cmd,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -419,7 +421,7 @@ class Manifest:
         make_cmd = ["make", "install"]
         pip_cmd = ["python3", "-m", "pip", "install", "."]
 
-        for _folder, record in repos.items():
+        for _folder, _record in repos.items():
             folder_path = self.get_folder_path(_folder)
             make_path = folder_path / "Makefile"
 
@@ -427,7 +429,7 @@ class Manifest:
                 error = folder_cmd(folder_path, make_cmd)
                 state = "Failed" if error else "OK"
 
-            elif record.get("type") == "python":
+            elif _record.get("type") == "python":
                 error = folder_cmd(folder_path, pip_cmd)
                 state = "Failed" if error else "OK"
 
@@ -466,7 +468,7 @@ class Manifest:
         repos = self.get_repos_from_manifest()
         tabler = Tabler()
 
-        for _folder, record in repos.items():
+        for _, record in repos.items():
             tabler.push_datum(dict(url=record.get("url"), ref=record.get("ref")))
         print(tabler.get_table())
 

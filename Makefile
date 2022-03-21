@@ -69,3 +69,7 @@ build:
 
 test:
 	pytest tests
+
+format:
+	isort .
+	black .
