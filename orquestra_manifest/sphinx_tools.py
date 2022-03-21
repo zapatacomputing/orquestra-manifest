@@ -1,9 +1,11 @@
 """Sphinx utils for this package"""
 import logging
 import os
-import sys
 import pathlib
+import sys
+
 from sphinx.cmd import quickstart
+
 from orquestra_manifest.utils import (
     add_line_to_file,
     append_string_to_file,

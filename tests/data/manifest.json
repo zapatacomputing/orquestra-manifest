@@ -21,8 +21,14 @@
          "type": "python",
          "autodoc": ["src/python/orquestra"]
       },
-      "orquestra-foo":{
-         "url": "git@github.com:zapatacomputing/orquestra-foo.git",
+      "dummy":{
+         "url": "https://github.com/KDE/dummy",
+         "ref": "v0.10.0",
+         "type": "python",
+         "autodoc": ["src/python/orquestra"]
+      },
+      "nonexistant":{
+         "url": "git@github.com:foo/nonexistant.git",
          "ref": "dev",
          "type": "python",
          "autodoc": ["src/foo", "bar"]

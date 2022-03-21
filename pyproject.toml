@@ -12,6 +12,9 @@ sphinx_rtd_theme = "*"
 clint = "^0.5.1"
 argcomplete = "^2.0.0"
 GitPython = ">=3.1.24"
+pytest = "*"
+black = "*"
+isort = "*"
 
 [tool.poetry.dev-dependencies]
 
