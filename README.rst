@@ -13,9 +13,16 @@ located anywhere.
 * See https://myrepos.branchable.com/ and https://github.com/nosarthur/gita for
   inspiration
 
+You can find more details in `docs/`.
+
 Why not just use some other tool?
 ----------------------------------
 * We want a simple tool that is easy to understand.
 * We want to use a JSON format for manifest.json
 * We want simple tests
 * We want to leveage modern tools like GitPython and Pathlib
+
+Installation
+-------------
+
+In order to install `morq` you can just run `make install` from the root directory.
