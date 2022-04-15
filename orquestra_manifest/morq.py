@@ -18,18 +18,22 @@ from orquestra_manifest.utils import (
     get_repo_ref_state_ok,
     get_repo_ref_type,
     git_pull_change,
+    ref_is_branch,
+    ref_in_refs,
     rm_tree,
 )
 
 logging.basicConfig(level=logging.INFO)
-LOG = logging.getLogger("orquestra_manifest.common")
+LOG = logging.getLogger("orquestra_manifest.morq")
 
 
 class Manifest:
     """Manifest class to manage package groups"""
 
-    def __init__(self):
+    def __init__(self, manifest=None):
         self.manifest_file = None
+        if manifest and pathlib.Path(manifest).exists():
+            self.manifest_file = pathlib.Path(manifest).resolve()
 
     def parse_args(self):
         """Create the parser for the class"""
@@ -169,7 +173,7 @@ class Manifest:
                 continue
 
             # Repo ref is invalid, skip:
-            if ref not in repo.refs:
+            if not ref_in_refs(repo, ref):
                 tabler.push_datum(
                     dict(
                         folder=folder_path.name,
@@ -298,8 +302,9 @@ class Manifest:
                     )
                     continue
 
+            # Repo is valid.
             # Check that the ref exists here first
-            if ref not in repo.refs:
+            if not ref_in_refs(repo, ref):
                 tabler.push_datum(
                     dict(
                         folder=folder_path.name,

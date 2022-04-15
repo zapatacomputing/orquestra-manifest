@@ -1,4 +1,4 @@
-"""Test common module"""
+"""Test morq module"""
 import logging
 import os
 import pathlib
@@ -7,7 +7,7 @@ import tempfile
 
 import pytest
 
-from orquestra_manifest.common import Manifest
+from orquestra_manifest.morq import Manifest
 from orquestra_manifest.utils import copy_package_file, get_package_root
 
 logging.basicConfig(level=logging.DEBUG)
@@ -61,7 +61,7 @@ class TestCommon:
         """
         self.caplog = caplog
 
-    def test_common_list(self):
+    def test_morq_list(self):
         """Test the list method"""
 
         # Override sys.argv to simulate user inputs
@@ -78,7 +78,7 @@ class TestCommon:
             [thing for thing in str.splitlines(outerr.out) if "git@github" in thing]
         )
 
-    def test_common_check(self):
+    def test_morq_check(self):
         """Test the check method"""
 
         # Override sys.argv to simulate user inputs

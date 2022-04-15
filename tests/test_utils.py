@@ -1,4 +1,4 @@
-"""Test common module"""
+"""Test utils module"""
 import logging
 import os
 import pathlib

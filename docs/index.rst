@@ -10,7 +10,7 @@ Morq: The Orquestra Manifest Tool!
    :maxdepth: 2
    :caption: Contents:
 
-   introduction
+   introduction.rst
 
 
 .. Indices and tables

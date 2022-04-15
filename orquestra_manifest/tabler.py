@@ -1,6 +1,6 @@
 """Module to assist with text tables"""
 import logging
-
+import re
 from clint.textui import colored
 
 logging.basicConfig()
@@ -82,14 +82,11 @@ class Tabler:
 
     def color_word(self, color, word, output):
         """Make a word red in output"""
-        if color == "red":
-            return output.replace(word, str(colored.red(word)))
-        elif color == "green":
-            return output.replace(word, str(colored.green(word)))
-        elif color == "blue":
-            return output.replace(word, str(colored.blue(word)))
-        elif color == "yellow":
-            return output.replace(word, str(colored.yellow(word)))
+        color_func = getattr(colored, color)
+        regex = re.compile(rf"(\s{word}\s)")
+        new_word = r" " + str(color_func(word)) + r" "
+        new = re.sub(regex, new_word, output)
+        return new
 
     def data_lines(self):
         """Return the data in lines"""
@@ -110,6 +107,8 @@ class Tabler:
         output = self.color_word("red", "N/A", output)
         output = self.color_word("blue", "Updated", output)
         output = self.color_word("green", "OK", output)
+        output = self.color_word("yellow", "changed", output)
+        output = self.color_word("green", "unchanged", output)
         output = self.color_word("blue", "New", output)
 
         return output
