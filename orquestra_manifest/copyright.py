@@ -164,7 +164,7 @@ def copy_brand(ticket=None):
         repo.git.add(update=True)
         commit_message = f"Add Copyright for ticket: {ticket}"
         repo.index.commit(commit_message)
-        repo.git.push()
+        repo.git.push("origin", ticket)
         LOG.info("Repo %s.%s has is ready for a PR", folder_path.stem, ticket)
 
 
