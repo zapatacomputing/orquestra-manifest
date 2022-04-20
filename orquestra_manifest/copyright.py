@@ -161,6 +161,13 @@ def copy_brand(ticket=None):
             repo,
             insert_copyright,
         )
+
+        # Determine if there are ANY changes. If not, continue.
+        repo_diffs = repo.index.diff("HEAD")
+        if not repo_diffs:
+            LOG.info("Repo %s.%s has no changes; continue.", folder_path.stem, ticket)
+            continue
+
         repo.git.add(update=True)
         commit_message = f"Add Copyright for ticket: {ticket}"
         repo.index.commit(commit_message)
