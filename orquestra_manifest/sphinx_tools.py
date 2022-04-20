@@ -37,7 +37,7 @@ def install_sphinx(folder, project_name="GenericProject", author="Zapata Computi
 def update_sphinx_conf(manifest):
     """Update Sphinx $folder/conf.py
 
-    manifest: a orquestra_manifest.common.Manifest object
+    manifest: a orquestra_manifest.morq.Manifest object
     return: boolean if success
     """
     _folder = manifest.manifest_file.parent

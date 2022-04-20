@@ -15,6 +15,7 @@ GitPython = ">=3.1.24"
 pytest = "*"
 black = "*"
 isort = "*"
+docutils = "==0.16"
 
 [tool.poetry.dev-dependencies]
 
@@ -23,7 +24,8 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-morq = "orquestra_manifest.common:morq_cli"
+morq = "orquestra_manifest.morq:morq_cli"
+copyright = "orquestra_manifest.copyright:copyright"
 
 # [tool.pytest]
 [tool.pytest.ini_options]

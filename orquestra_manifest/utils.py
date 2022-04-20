@@ -2,6 +2,7 @@
 import logging
 import os
 import pathlib
+import re
 import subprocess
 from enum import Enum, unique
 
@@ -219,17 +220,7 @@ def git_pull_change(repo, ref):
     return: state string: [changed, unchanged, invalid]
     """
     current = repo.head.commit
-
-    # You can't update a tag, try main or master.
-    if ref_is_tag(repo, ref):
-        if "main" in repo.remotes.origin.refs:
-            repo.git.checkout("main")
-        elif "master" in repo.remotes.origin.refs:
-            repo.git.checkout("master")
-        else:
-            LOG.warning("Unable to find main or master in : %s", repo)
-
-    repo.remotes.origin.pull()
+    repo.remotes.origin.pull(ref)
     repo_name = repo.working_dir.split("/")[-1]
 
     try:
@@ -238,12 +229,21 @@ def git_pull_change(repo, ref):
         LOG.warning("Git reference %s invalid for %s: %s", ref, repo_name, ex)
         return "invalid"
 
-    if current == repo.head.commit:
-        LOG.debug("Git state unchanged: %s", repo_name)
-        return "unchanged"
+    if current != repo.head.commit:
+        LOG.debug("Git state changed: %s", repo_name)
+        return "changed"
 
-    LOG.debug("Git state changed: %s", repo_name)
-    return "changed"
+    LOG.debug("Git state unchanged: %s", repo_name)
+    return "unchanged"
+
+
+def ref_in_refs(repo, ref):
+    """Is this ref a tag?"""
+    refs = []
+    for _ref in repo.refs:
+        refs.append(_ref.name)
+
+    return any(_ref in refs for _ref in [ref, "origin/" + ref, "remotes/origin/" + ref])
 
 
 def ref_is_tag(repo, ref):
@@ -254,10 +254,21 @@ def ref_is_tag(repo, ref):
 
 
 def ref_is_branch(repo, ref):
-    """Is this ref a tag?"""
-    if ref in repo.branches:
-        return True
-    return False
+    """Is this ref a branch?
+
+    * This questions is not obvious if the local version only has limited refs.
+    * This is why we have to get a full set of branches from remote.
+    """
+    # repo.git.branch() is a string
+    _branches = repo.git.branch("--all").split()
+    # Pattern for good branch names
+    pattern = re.compile(r"^[\w\/\-]+$")
+    # Filter out funky special chars out of branches to be sure.
+    branches = [i for i in _branches if pattern.match(i)]
+
+    return any(
+        _ref in branches for _ref in [ref, "origin/" + ref, "remotes/origin/" + ref]
+    )
 
 
 def ref_is_commit(repo, ref):

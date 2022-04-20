@@ -1,4 +1,4 @@
-"""Test common module"""
+"""Test Sphinx module"""
 import logging
 import os
 import pathlib
@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from orquestra_manifest.common import Manifest
+from orquestra_manifest.morq import Manifest
 from orquestra_manifest.sphinx_tools import install_sphinx, update_sphinx_conf
 from orquestra_manifest.utils import copy_package_file, get_package_root, rm_tree
 

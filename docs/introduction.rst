@@ -18,16 +18,15 @@ Morq must have the following base abilities:
 #. Update those repos to a proper git state: *update*
 #. Remove all the target repos: *purge*
 
-In addtion to the above Morq must be able to do limited installation and testing:
+In addition to the above Morq must be able to do limited installation and testing:
 
 #. Build all the target repos: *build*
 #. Test all the target repos: *test*
 
 
-We list the basic commands that we associate to those tasks.
-
 Why not just use some other tool?
 ----------------------------------
+
 * Leverage the modern GitPython and Pathlib, instead of ancient 2.7-ish code.
 * We want a simple tool that is easy to understand.
 * We want to use a JSON format for manifest.json (No XML please ;)
@@ -35,12 +34,13 @@ Why not just use some other tool?
 
 Morq Commands
 ==============
-In order to achieve these 5 conditions, we implement these in a simple Command Line
+In order to achieve these conditions, we implement these in a simple Command Line
 Interface (CLI), which we will outline below. The command we use to invoke these options
 will be called *morq*:
 
 List Repo
 -------------
+
 This just lists what the manifest believes is truth::
 
    morq [-m /path/to/manifest.json] list
@@ -62,11 +62,11 @@ reference, whatever that may be. We do so in this way::
 Omitting the -m stuff will assume that you are in the folder that already has a manifest
 file. You'll see something like this when invoked::
 
-   INFO:orquestra_manifest.common:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/orquestra-auth
-   INFO:orquestra_manifest.common:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/call-simulator
-   INFO:orquestra_manifest.common:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/orquestra-sdk
-   INFO:orquestra_manifest.common:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/orquestra-foo
-   CRITICAL:orquestra_manifest.common:  => URL git@github.com:zapatacomputing/orquestra-foo.git does not exist!
+   INFO:orquestra_manifest.morq:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/orquestra-auth
+   INFO:orquestra_manifest.morq:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/call-simulator
+   INFO:orquestra_manifest.morq:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/orquestra-sdk
+   INFO:orquestra_manifest.morq:Cloning repo /Users/carinhas/orquestra-manifest/tests/data/orquestra-foo
+   CRITICAL:orquestra_manifest.morq:  => URL git@github.com:zapatacomputing/orquestra-foo.git does not exist!
 
 
 Check Repo States
@@ -172,7 +172,7 @@ The JSON format must include:
    * The SuperRepo can have multiple branches corresponding to various features. Promoting those
      features to main is equivalent to a *release*.
 
-   * You must create a Git tag that reflect the correct state of your project as 
+   * You must create a Git tag that reflect the correct state of your project as
      defined by this manifest.
 
 
@@ -220,21 +220,82 @@ Autoapi has these useful features:
 What Works
 ------------------------------
 
-* Sphinx can be initialized programatically within a repo folder
+* Sphinx can be initialized programmatically within a repo folder
 * Sphinx configuration can be modified automatically to add *autoapi* features
 * Docs in `~/docs` render correctly
 * Source documentation listed in the manifest renders decently.
 
 What Needs Development
 ------------------------------
+
 * All repos must include `~/docs/index.rst` files to make this work.
 * Source code RST docs must be implemented.
 * Better tests.
 * Improve Sphinx theme.
 * Refine the *autoapi* output, clean up junk.
 * Autoapi only allows one language at this time. Want: Python+Go
-* Remove verison number from manifest.json, its redundant.
+* Remove version number from manifest.json, its redundant.
 * Remove init, and use update only.. It works. ;)
 * Be able to use manifest to install python packages
-* Don't invent another Conda... Keep it simple.
+* Don't invent another Conda. Keep it simple.
+
+
+Copyright Management
+=====================
+
+The copyright tool will automatically add and update copyright notices.
+
+Process
+---------
+
+For each branch in the manifest:
+
+* Create a new branch labeled by ticket
+* Update copyright if it exists
+* Update copyright if none exists
+* Commit those changes
+* Push those changes up to Github
+* A note is printed informing the user to create a PR
+
+Features
+----------
+
+* Leverages manifest.json and Morq
+* Uses the Git log to identify first-year and last-year for copyright.
+* If only one year is detected, use only that year in the copyright.
+* Files that already have a copyright are updated.
+* Identify files by extension and adds python-style copyright to (".py", "Makefile") and
+  c-style copyright to (".go", ".h", ".c", ".cc", ".hpp", ".cpp")
+* New branches are:
+
+  - created based on *--ticket=\'ORQSDK-123\'*
+
+  - changed
+  - committed, and
+  - pushed to origin
+
+
+Function
+---------
+
+To add/update copyrights to files of
+you must take these steps:
+
+#. create an empty folder with manifest.json::
+
+      mkdir repos; cd repos
+      touch manifest.json
+
+#. Populate manifest.json with the repos and initial branches.
+   Ensure that the repo references that branches you want to modify.
+
+#. Initialize all repos::
+
+      morq init
+
+#. Use the copyright tool::
+
+      copyright --ticket='ORQSDK-1234'
+
+#. Go to github.com and create a pull request
 
