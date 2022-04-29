@@ -163,7 +163,7 @@ def copy_brand(ticket=None):
         )
 
         # Determine if there are ANY changes. If not, continue.
-        repo_diffs = repo.index.diff("HEAD")
+        repo_diffs = repo.index.diff(None)
         if not repo_diffs:
             LOG.info("Repo %s.%s has no changes; continue.", folder_path.stem, ticket)
             continue
