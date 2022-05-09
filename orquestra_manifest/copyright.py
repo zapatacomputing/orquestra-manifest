@@ -13,7 +13,7 @@ LOG = logging.getLogger("orquestra_manifest.morq")
 SCRIPT_RX = re.compile(r"(?P<firstline>^#!.*?$)", re.M)
 FILE_RX = re.compile(r"(?P<firstline>^.*?$)", re.M)
 COPYRIGHT_RX = re.compile(
-    r"(?P<copyright>\s*?[\u00a9] Copyright \d{4}(-\d{4})? Zapata Computing Inc.).*"
+    r"(?P<copyright>[\u00a9] Copyright \d{4}(-\d{4})? Zapata Computing Inc.).*"
 )
 
 
@@ -89,16 +89,15 @@ def insert_copyright(first_year, last_year, file):
     else:
         year_string = str(first_year) + "-" + str(last_year)
 
-    # See if there is an existing copyright, prepare a modification.
+    # replace: if there is an existing copyright, prepare a modification.
     copyright_line = make_copyright_line(year_string)
-    new_file_text = ""
     match = COPYRIGHT_RX.search(file_text)
     if match:
-        found_copyright = match.group("copyright")
         # Update the copyright if needed:
-        if str(last_year) not in found_copyright:
+        if str(last_year) not in match.group("copyright"):
             new_file_text = re.sub(COPYRIGHT_RX, copyright_line, file_text)
             write_file(file, new_file_text)
+        # Return since we have a copyright.
         return
 
     # -------------------------------------------------------------------------
