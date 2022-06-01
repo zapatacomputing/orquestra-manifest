@@ -3,23 +3,28 @@
    "comment": "Version is not related to any release version. Its an internal format version.",
    "repos": {
       "orquestra-workflow": {
-         "url": "git+ssh://git@github.com/zapatacomputing/orquestra-workflow.git",
-         "ref": "dev",
+         "url": "git+ssh://git@github.com/zapatacomputing/orquestra-quantum.git",
+         "ref": "v0.2.0",
          "type": "python",
-         "autodoc": ["src/orquestra"]
+         "autodoc": [
+            "src/orquestra"
+         ]
       },
-      "orquestra-sdk":{
-         "url": "git@github.com:zapatacomputing/orquestra-sdk.git",
-         "ref": "dev",
+      "orquestra-sdk": {
+         "url": "git@github.com:zapatacomputing/orquestra-opt.git",
+         "ref": "main",
          "type": "python",
-         "autodoc": ["src/python/orquestra"]
+         "autodoc": [
+            "src/orquestra"
+         ]
       },
-      "orquestra-runtime":{
-         "url": "git@github.com:zapatacomputing/orquestra-runtime.git",
+      "orquestra-runtime": {
+         "url": "git@github.com:zapatacomputing/orquestra-vqa.git",
          "ref": "dev",
          "type": "python",
-         "autodoc": ["src/python/orquestra"]
+         "autodoc": [
+            "src/orquestra"
+         ]
       }
    }
 }
-
