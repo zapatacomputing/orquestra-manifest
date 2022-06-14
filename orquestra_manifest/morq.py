@@ -451,7 +451,7 @@ class Manifest:
         return total_error
 
     def build_repos_dev(self):
-        """Build all repos
+        """Build all repos in development mode.
 
         Return: (int) Total error
         """

@@ -136,16 +136,14 @@ class TestCommon:
 
         output = self.manifest.parse_args()
         assert output is True
-
         outerr = self.capsys.readouterr()
-        expected = ("+-------------------+--------+\n"
-                    "| folder            | test   |\n"
-                    "+-------------------+--------+\n"
-                    "| orquestra-quantum | Failed |\n"
-                    "| orquestra-opt     | Failed |\n"
-                    "| orquestra-vqa     | OK     |\n"
-                    "| dummy             | OK     |\n"
-                    "| nonexistant       | Failed |\n"
-                    "+-------------------+--------+")
+        expected = [
+            "orquestra-quantum.*OK",
+            "orquestra-opt.*Failed",
+            "orquestra-vqa.*OK",
+            "dummy.*OK",
+            "nonexistant.*Failed"
+        ]
 
-        assert expected in outerr.out
+        for regex in expected:
+            assert re.search(regex, outerr.out)

@@ -4,7 +4,7 @@
    "comment": "Version is not related to any release version. Its an internal format version.",
    "repos": {
       "orquestra-quantum": {
-         "url": "git@github.com/zapatacomputing/orquestra-quantum.git",
+         "url": "git@github.com:zapatacomputing/orquestra-quantum.git",
          "ref": "main",
          "type": "python",
          "autodoc": ["orquestra"]
