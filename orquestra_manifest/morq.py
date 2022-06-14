@@ -18,7 +18,6 @@ from orquestra_manifest.utils import (
     get_repo_ref_state_ok,
     get_repo_ref_type,
     git_pull_change,
-    ref_is_branch,
     ref_in_refs,
     rm_tree,
 )
@@ -66,6 +65,9 @@ class Manifest:
 
         parser_build = subparsers.add_parser("build")
         parser_build.set_defaults(func=self.build_repos)
+
+        parser_build = subparsers.add_parser("dev")
+        parser_build.set_defaults(func=self.build_repos_dev)
 
         parser_build = subparsers.add_parser("test")
         parser_build.set_defaults(func=self.test_repos)
@@ -448,19 +450,53 @@ class Manifest:
         print(tabler.get_table())
         return total_error
 
+    def build_repos_dev(self):
+        """Build all repos in development mode.
+
+        Return: (int) Total error
+        """
+        total_error = 0
+        error = 0
+        tabler = Tabler()
+        repos = self.get_repos_from_manifest()
+        make_cmd = ["make", "dev"]
+        pip_cmd = ["python3", "-m", "pip", "install", "-e", ".[dev]"]
+
+        for _folder, _record in repos.items():
+            folder_path = self.get_folder_path(_folder)
+            make_path = folder_path / "Makefile"
+
+            if make_path.exists():
+                error = folder_cmd(folder_path, make_cmd)
+                state = "Failed" if error else "OK"
+
+            elif _record.get("type") == "python":
+                error = folder_cmd(folder_path, pip_cmd)
+                state = "Failed" if error else "OK"
+
+            else:
+                error = 10
+                state = f"Builder {_folder} N/A"
+
+            total_error += error
+            tabler.push_datum(dict(folder=_folder, build_dev=state))
+
+        print(tabler.get_table())
+        return total_error
+
     def test_repos(self):
         """Test all repos
 
         Return: Total error
         """
         total_error = 0
+        total_error += self.build_repos_dev()
         tabler = Tabler()
         repos = self.get_repos_from_manifest()
 
         for _folder, _ in repos.items():
             error = 0
             folder_path = self.get_folder_path(_folder)
-            error += folder_cmd(folder_path, ["make", "develop"], stdout=False)
             error += folder_cmd(folder_path, ["make", "test"], stdout=True)
             total_error += error
             tabler.push_datum(dict(folder=_folder, test=("Failed" if error else "OK")))
