@@ -12,16 +12,17 @@ Lets proceed: We start by introducing a tool called *Morq*.
 It requires a manifest file in JSON format which we describe below.
 Morq must have the following base abilities:
 
-#. List the manifest: *list*
-#. Download arbitrary git repos: *init*
-#. Verify that the repos are in their proper state: *check*
-#. Update those repos to a proper git state: *update*
-#. Remove all the target repos: *purge*
+#. List the manifest: *morq list*
+#. Download arbitrary git repos: *morq init*
+#. Verify that the repos are in their proper state: *morq check*
+#. Update those repos to a proper git state: *morq update*
+#. Remove all the target repos: *morq purge*
 
 In addition to the above Morq must be able to do limited installation and testing:
 
-#. Build all the target repos: *build*
-#. Test all the target repos: *test*
+#. Build all the target repos: *morq build*
+#. Build all targets in develop mode: *morq dev*
+#. Test all the target repos: *morq test*
 
 
 Why not just use some other tool?
@@ -93,6 +94,23 @@ tag, commit. Invocation is::
 
    morq [-m /path/to/manifest.json] update
 
+
+Build Repos
+-----------------------
+Build all the repos either in production or development mode::
+
+   morq [-m /path/to/manifest.json] build
+     -- or --
+   morq [-m /path/to/manifest.json] dev
+
+Test Repos
+-----------------------
+Testing the unit tests will do two things:
+* Install the repos in development mode
+* Run the unit tests for each repo
+::
+
+   morq [-m /path/to/manifest.json] test
 
 Purge Installed Repos
 -----------------------

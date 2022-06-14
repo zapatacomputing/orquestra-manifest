@@ -3,6 +3,7 @@ import logging
 import os
 import pathlib
 import sys
+import re
 import tempfile
 
 import pytest
@@ -118,3 +119,33 @@ class TestCommon:
 
         outerr = self.capsys.readouterr()
         assert "nonexistant" in outerr.out
+
+    def test_build_repos_dev(self):
+        """Test the check method"""
+        sys.argv = ["", "-m", self.manifest_file.as_posix(), "dev"]
+
+        output = self.manifest.parse_args()
+        assert output is True
+
+        outerr = self.capsys.readouterr()
+        assert re.search(r'dummy.*Failed.*\n.*nonexistant', outerr.out) is not None
+
+    def test_repos_test(self):
+        """Test the check method"""
+        sys.argv = ["", "-m", self.manifest_file.as_posix(), "test"]
+
+        output = self.manifest.parse_args()
+        assert output is True
+
+        outerr = self.capsys.readouterr()
+        expected = ("+-------------------+--------+\n"
+                    "| folder            | test   |\n"
+                    "+-------------------+--------+\n"
+                    "| orquestra-quantum | Failed |\n"
+                    "| orquestra-opt     | Failed |\n"
+                    "| orquestra-vqa     | OK     |\n"
+                    "| dummy             | OK     |\n"
+                    "| nonexistant       | Failed |\n"
+                    "+-------------------+--------+")
+
+        assert expected in outerr.out
