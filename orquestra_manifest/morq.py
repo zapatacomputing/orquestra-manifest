@@ -142,7 +142,7 @@ class Manifest:
         if behind:
             return behind
 
-        ahead = sum(1 for x in repo.iter_commits(ref + ".."))
+        ahead = sum([1 for x in (repo.iter_commits(f"{ref}@{{u}}..{ref}"))])
         if ahead:
             return ahead
 
