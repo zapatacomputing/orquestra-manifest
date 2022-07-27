@@ -213,13 +213,11 @@ class Manifest:
                 continue
 
             if repo.is_dirty():
-                ref_type = get_repo_ref_type(repo, ref)
-
                 tabler.push_datum(
                     dict(
                         folder=folder_path.name,
                         ref=ref,
-                        ref_type=ref_type.name,
+                        position="invalid",
                         status="Dirty",
                     )
                 )

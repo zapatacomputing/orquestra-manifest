@@ -128,7 +128,7 @@ class TestCommon:
         assert output is True
 
         outerr = self.capsys.readouterr()
-        assert re.search(r'dummy.*Failed.*\n.*nonexistant', outerr.out) is not None
+        assert re.search(r"dummy.*Failed.*\n.*nonexistant", outerr.out) is not None
 
     def test_repos_test(self):
         """Test the check method"""
@@ -139,10 +139,10 @@ class TestCommon:
         outerr = self.capsys.readouterr()
         expected = [
             "orquestra-quantum.*OK",
-            "orquestra-opt.*Failed",
+            "orquestra-opt.*OK",
             "orquestra-vqa.*OK",
-            "dummy.*OK",
-            "nonexistant.*Failed"
+            "dummy.*Failed",
+            "nonexistant.*Failed",
         ]
 
         for regex in expected:
