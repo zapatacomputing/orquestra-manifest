@@ -134,6 +134,8 @@ def folder_walk(repo, command):
             if file.endswith(extension):
                 path = os.path.join(dirpath, file)
                 commits = list(repo.iter_commits(paths=path))
+                if not commits:
+                    continue
                 first_year = commits[-1].committed_datetime.year
                 last_year = commits[0].committed_datetime.year
                 command(first_year, last_year, path)
