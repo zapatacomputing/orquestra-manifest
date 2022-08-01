@@ -220,7 +220,12 @@ def git_pull_change(repo, ref):
     return: state string: [changed, unchanged, invalid]
     """
     current = repo.head.commit
-    repo.remotes.origin.pull(ref)
+    try:
+        repo.remotes.origin.pull(ref)
+    except Exception as ex:
+        LOG.warning("Git state is quite broken for %s: %s", ref, ex)
+        return "unchanged"
+
     repo_name = repo.working_dir.split("/")[-1]
 
     try:
