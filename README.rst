@@ -20,7 +20,7 @@ Why not just use some other tool?
 * We want a simple tool that is easy to understand.
 * We want to use a JSON format for manifest.json
 * We want simple tests
-* We want to leveage modern tools like GitPython and Pathlib
+* We want to leverage modern tools like GitPython and Pathlib
 
 Installation
 -------------
