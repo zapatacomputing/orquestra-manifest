@@ -15,7 +15,7 @@ GitPython = ">=3.1.24"
 pytest = "*"
 black = "*"
 isort = "*"
-docutils = "==0.16"
+docutils = ">=0.16"
 
 [tool.poetry.dev-dependencies]
 
