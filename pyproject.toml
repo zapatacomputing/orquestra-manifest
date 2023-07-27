@@ -6,8 +6,8 @@ authors = ["Zapata Computing <zapata@zapatacomputing.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.7"
-Sphinx = "^4.3.2"
-sphinx-autoapi = "^1.8.4" 
+Sphinx = ">4.3.2"
+sphinx-autoapi = ">1.8.4" 
 sphinx_rtd_theme = "*"
 clint = "^0.5.1"
 argcomplete = "^2.0.0"
